@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# list all deployment container name and container image
+# support fuzzy search
+# use: kubectl images [KEYWORD]
+
+IMAGES=$(kubectl get deploy -o go-template='{{printf "%-40s%s\n" "CONTAINER NAME" "CONATINER IMAGE" }}{{range .items}}{{range .spec.template.spec.containers}}{{printf "%-40s%s\n" .name .image}}{{end}}{{end}}')
+
+if [ -z "${1}" ]; then
+    echo "${IMAGES}"
+else
+    echo "${IMAGES}" | egrep "CONTAINER|.*${1}.*"
+fi
