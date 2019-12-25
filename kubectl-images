@@ -1,10 +1,40 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # list all deployment container name and container image
 # support fuzzy search
-# use: kubectl images [KEYWORD]
+# use: kubectl images [-n NAMESPACE|--all-namespaces] [KEYWORD]
 
-IMAGES=$(kubectl get deploy -o go-template='{{printf "%-40s%s\n" "CONTAINER NAME" "CONATINER IMAGE" }}{{range .items}}{{range .spec.template.spec.containers}}{{printf "%-40s%s\n" .name .image}}{{end}}{{end}}')
+while [[ $# -gt 1 ]]
+do
+key="${1}"
+
+case ${key} in
+    -n|--namespace)
+    NAMESPACE="${2}"
+    shift # past argument
+    ;;
+    --all-namespaces)
+    NAMESPACE="all"
+    shift # past argument
+    ;;
+    *)
+    # unknown option
+    ;;
+esac
+shift # past argument or value
+done
+
+if [ -n "${NAMESPACE}" ]; then
+    if [ "${NAMESPACE}" == "all" ]; then
+        NAMESPACE_CMD="--all-namespaces"
+    else
+        NAMESPACE_CMD="--namespace ${NAMESPACE}"
+    fi
+else
+    NAMESPACE_CMD="--namespace default"
+fi
+
+IMAGES=$(kubectl get deploy ${NAMESPACE_CMD} -o go-template='{{printf "%-40s%s\n" "CONTAINER NAME" "CONATINER IMAGE" }}{{range .items}}{{range .spec.template.spec.containers}}{{printf "%-40s%s\n" .name .image}}{{end}}{{end}}')
 
 if [ -z "${1}" ]; then
     echo "${IMAGES}"
