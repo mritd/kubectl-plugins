@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+CONFIG_DIR="${HOME}/Documents/config/kubectl"
+
+if [ ! -n "${1}" ]; then
+    echo "ERROR: config name cannot be empty!"
+    exit 1
+fi
+
+if [ ! -d "${HOME}/.kube" ]; then
+    mkdir ${HOME}/.kube
+fi
+
+ln -sf ${CONFIG_DIR}/${1} ${HOME}/.kube/config
